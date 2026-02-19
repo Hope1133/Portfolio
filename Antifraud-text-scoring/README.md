@@ -1,6 +1,6 @@
 # Anti-Fraud SMS Detection (NLP + OSINT Features)
 
-## Project Goal
+#### Project Goal
 
 Build a simple but structured ML pipeline for detecting fraudulent SMS messages.
 
@@ -15,7 +15,7 @@ This project simulates a simplified fraud detection system similar to those used
 
 ---
 
-# Dataset
+## Dataset
 
 **SMS Spam Collection Dataset**
 
@@ -29,14 +29,14 @@ The dataset contains raw SMS text and binary labels.
 
 ---
 
-# Exploratory Data Analysis
+## Exploratory Data Analysis
 
 - Checked class imbalance
 - Analyzed message length
 - Measured frequency of URLs and phone numbers
 - Identified words frequently appearing in spam
 
-### Class Imbalance
+##### Class Imbalance
 
 Spam messages represent ~13–15% of the dataset.
 
@@ -47,9 +47,9 @@ To handle imbalance:
 
 ---
 
-# 🧠 Feature Engineering
+## Feature Engineering
 
-## 1️⃣ Text Preprocessing
+#### 1. Text Preprocessing
 
 - Lowercasing
 - URL masking
@@ -59,7 +59,7 @@ To handle imbalance:
 
 ---
 
-## 2️⃣ NLP Features
+#### 2. NLP Features
 
 Used **TF-IDF vectorization**:
 
@@ -70,9 +70,7 @@ Used **TF-IDF vectorization**:
 
 ---
 
-## 3️⃣ OSINT-Inspired Features
-
-Inspired by real fraud detection signals:
+#### 3. OSINT-Inspired Features
 
 | Feature             | Description              |
 | ****************--- | ************************ |
@@ -87,32 +85,21 @@ These features simulate rule-based risk indicators used in anti-fraud systems.
 
 ---
 
-# 🤖 Model
+## Model
 
-## Baseline Model
+#### Baseline Model
 
 **Logistic Regression**
 
 Why:
-
 - Interpretable
 - Fast
 - Good baseline for text classification
 - Common in production systems
 
-Configuration:
-
-```python
-LogisticRegression(
-    class_weight='balanced',
-    max_iter=1000,
-    random_state=42
-)
-```
-
 ---
 
-# 📈 Evaluation Metrics
+## Evaluation Metrics
 
 Used the following metrics:
 
@@ -125,17 +112,16 @@ Used the following metrics:
 - 5-fold Cross-Validation
 
 Fraud detection focus:
-
 - High recall (to reduce missed fraud)
 - Balanced precision
 
 ---
 
-# ⚖ Hybrid Risk Scoring
+## Hybrid Risk Scoring
 
 In addition to ML model, implemented a simple rule-based scoring system.
 
-### Rule Examples
+##### Rule Examples
 
 - Contains URL → +2
 - Contains phone → +2
@@ -150,24 +136,11 @@ final_score = 0.7 - ML_probability + 0.3 - normalized_rule_score
 ```
 
 Threshold selected using F1 optimization on PR curve.
-
 This approach improves interpretability and simulates real-world fraud risk scoring.
 
 ---
 
-# 🏗 Project Structure
-
-```
-data/
-src/
-  features.py
-  train.py
-  predict.py
-models/
-README.md
-```
-
-### Pipeline Steps
+##### Pipeline Steps
 
 1. Load data
 2. Preprocess text
@@ -179,7 +152,7 @@ README.md
 
 ---
 
-# ⚙ Production-Oriented Design
+## Production-Oriented Design
 
 - Used `sklearn Pipeline`
 - Avoided data leakage
@@ -187,20 +160,13 @@ README.md
 - Saved full pipeline as single artifact
 - Implemented batch scoring script
 
-Example:
-
-```
-python predict.py new_sms.csv scored_sms.csv
-```
-
 Output contains:
-
 - probability
 - fraud_flag
 
 ---
 
-# 🔍 Key Insights
+## Key Insights
 
 - URLs strongly correlate with spam
 - Fraud messages contain more digits
@@ -209,7 +175,7 @@ Output contains:
 
 ---
 
-# 🛠 Tech Stack
+## Tech Stack
 
 - Python
 - pandas
@@ -217,38 +183,3 @@ Output contains:
 - TF-IDF
 - regex
 - joblib
-
----
-
-# 📚 What I Learned
-
-- Handling imbalanced classification
-- Text feature engineering
-- Avoiding data leakage
-- Building sklearn pipelines
-- Designing rule-based fraud logic
-- Evaluating models using PR-AUC
-- Creating batch scoring workflow
-
----
-
-# 🚀 Possible Improvements
-
-- Try Gradient Boosting / XGBoost
-- Add character n-grams
-- Add SHAP explanations
-- Build REST API for real-time scoring
-- Integrate domain reputation data
-
----
-
-# 🎯 Why This Project Matters
-
-This project demonstrates:
-
-- Understanding of fraud detection logic
-- Ability to build full ML pipeline
-- Practical NLP experience
-- Clean project structure
-- Production-oriented thinking
-
