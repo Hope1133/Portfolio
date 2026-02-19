@@ -13,8 +13,6 @@ The system combines:
 
 This project simulates a simplified fraud detection system similar to those used in fintech or telecom companies.
 
----
-
 ## Dataset
 
 **SMS Spam Collection Dataset**
@@ -26,8 +24,6 @@ This project simulates a simplified fraud detection system similar to those used
   - `spam` (fraudulent message)
 
 The dataset contains raw SMS text and binary labels.
-
----
 
 ## Exploratory Data Analysis
 
@@ -57,7 +53,6 @@ To handle imbalance:
 - Number normalization
 - Punctuation removal
 
----
 
 #### 2. NLP Features
 
@@ -68,7 +63,6 @@ Used **TF-IDF vectorization**:
 - English stop-words removal
 - min document frequency filtering
 
----
 
 #### 3. OSINT-Inspired Features
 
@@ -83,7 +77,6 @@ Used **TF-IDF vectorization**:
 
 These features simulate rule-based risk indicators used in anti-fraud systems.
 
----
 
 ## Model
 
@@ -96,8 +89,6 @@ Why:
 - Fast
 - Good baseline for text classification
 - Common in production systems
-
----
 
 ## Evaluation Metrics
 
@@ -115,7 +106,6 @@ Fraud detection focus:
 - High recall (to reduce missed fraud)
 - Balanced precision
 
----
 
 ## Hybrid Risk Scoring
 
@@ -138,7 +128,6 @@ final_score = 0.7 - ML_probability + 0.3 - normalized_rule_score
 Threshold selected using F1 optimization on PR curve.
 This approach improves interpretability and simulates real-world fraud risk scoring.
 
----
 
 ##### Pipeline Steps
 
@@ -150,7 +139,6 @@ This approach improves interpretability and simulates real-world fraud risk scor
 6. Save pipeline
 7. Run batch scoring
 
----
 
 ## Production-Oriented Design
 
@@ -164,7 +152,6 @@ Output contains:
 - probability
 - fraud_flag
 
----
 
 ## Key Insights
 
@@ -173,7 +160,6 @@ Output contains:
 - Certain words (e.g. win, urgent, verify) are strong signals
 - Hybrid ML + rules improves transparency
 
----
 
 ## Tech Stack
 
