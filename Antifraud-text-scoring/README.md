@@ -1,4 +1,254 @@
-# antifraud-text-scoring
-Проект для портфолио в области антифрода.  
-**Тема:** скоринг SMS-сообщений с помощью NLP и OSINT-признаков.  
-Модель и батч-пайплайн имитируют продакшн-окружение (Airflow, модульный код).  
+# Anti-Fraud SMS Detection (NLP + OSINT Features)
+
+## Project Goal
+
+Build a simple but structured ML pipeline for detecting fraudulent SMS messages.
+
+The system combines:
+- NLP-based features (TF-IDF)
+- OSINT-inspired rule features (URLs, phones, suspicious words)
+- Logistic Regression baseline
+- Hybrid ML + rule-based risk scoring
+- Batch scoring script
+
+This project simulates a simplified fraud detection system similar to those used in fintech or telecom companies.
+
+---
+
+# Dataset
+
+**SMS Spam Collection Dataset**
+
+- 5,574 SMS messages
+- Labels:
+
+  - `ham` (legitimate message)
+  - `spam` (fraudulent message)
+
+The dataset contains raw SMS text and binary labels.
+
+---
+
+# Exploratory Data Analysis
+
+- Checked class imbalance
+- Analyzed message length
+- Measured frequency of URLs and phone numbers
+- Identified words frequently appearing in spam
+
+### Class Imbalance
+
+Spam messages represent ~13–15% of the dataset.
+
+To handle imbalance:
+
+- Used `stratified train/test split`
+- Applied `class_weight='balanced'` in Logistic Regression
+
+---
+
+# 🧠 Feature Engineering
+
+## 1️⃣ Text Preprocessing
+
+- Lowercasing
+- URL masking
+- Phone masking
+- Number normalization
+- Punctuation removal
+
+---
+
+## 2️⃣ NLP Features
+
+Used **TF-IDF vectorization**:
+
+- 1–2 grams
+- max 2000 features
+- English stop-words removal
+- min document frequency filtering
+
+---
+
+## 3️⃣ OSINT-Inspired Features
+
+Inspired by real fraud detection signals:
+
+| Feature             | Description              |
+| ****************--- | ************************ |
+| url_count           | Number of URLs           |
+| phone_count         | Number of phone patterns |
+| digit_count         | Number of digits         |
+| caps_ratio          | Uppercase letter ratio   |
+| money symbols       | $, €, £                  |
+| fraud keyword count | Spam-specific words      |
+
+These features simulate rule-based risk indicators used in anti-fraud systems.
+
+---
+
+# 🤖 Model
+
+## Baseline Model
+
+**Logistic Regression**
+
+Why:
+
+- Interpretable
+- Fast
+- Good baseline for text classification
+- Common in production systems
+
+Configuration:
+
+```python
+LogisticRegression(
+    class_weight='balanced',
+    max_iter=1000,
+    random_state=42
+)
+```
+
+---
+
+# 📈 Evaluation Metrics
+
+Used the following metrics:
+
+- ROC-AUC
+- Precision
+- Recall
+- F1-score
+- PR-AUC
+- Confusion Matrix
+- 5-fold Cross-Validation
+
+Fraud detection focus:
+
+- High recall (to reduce missed fraud)
+- Balanced precision
+
+---
+
+# ⚖ Hybrid Risk Scoring
+
+In addition to ML model, implemented a simple rule-based scoring system.
+
+### Rule Examples
+
+- Contains URL → +2
+- Contains phone → +2
+- Many digits → +1
+- Many fraud keywords → +2
+- Contains money symbols → +2
+
+Final hybrid score:
+
+```
+final_score = 0.7 - ML_probability + 0.3 - normalized_rule_score
+```
+
+Threshold selected using F1 optimization on PR curve.
+
+This approach improves interpretability and simulates real-world fraud risk scoring.
+
+---
+
+# 🏗 Project Structure
+
+```
+data/
+src/
+  features.py
+  train.py
+  predict.py
+models/
+README.md
+```
+
+### Pipeline Steps
+
+1. Load data
+2. Preprocess text
+3. Extract features
+4. Train model
+5. Evaluate
+6. Save pipeline
+7. Run batch scoring
+
+---
+
+# ⚙ Production-Oriented Design
+
+- Used `sklearn Pipeline`
+- Avoided data leakage
+- Stratified split
+- Saved full pipeline as single artifact
+- Implemented batch scoring script
+
+Example:
+
+```
+python predict.py new_sms.csv scored_sms.csv
+```
+
+Output contains:
+
+- probability
+- fraud_flag
+
+---
+
+# 🔍 Key Insights
+
+- URLs strongly correlate with spam
+- Fraud messages contain more digits
+- Certain words (e.g. win, urgent, verify) are strong signals
+- Hybrid ML + rules improves transparency
+
+---
+
+# 🛠 Tech Stack
+
+- Python
+- pandas
+- scikit-learn
+- TF-IDF
+- regex
+- joblib
+
+---
+
+# 📚 What I Learned
+
+- Handling imbalanced classification
+- Text feature engineering
+- Avoiding data leakage
+- Building sklearn pipelines
+- Designing rule-based fraud logic
+- Evaluating models using PR-AUC
+- Creating batch scoring workflow
+
+---
+
+# 🚀 Possible Improvements
+
+- Try Gradient Boosting / XGBoost
+- Add character n-grams
+- Add SHAP explanations
+- Build REST API for real-time scoring
+- Integrate domain reputation data
+
+---
+
+# 🎯 Why This Project Matters
+
+This project demonstrates:
+
+- Understanding of fraud detection logic
+- Ability to build full ML pipeline
+- Practical NLP experience
+- Clean project structure
+- Production-oriented thinking
+
