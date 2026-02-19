@@ -41,7 +41,6 @@ To handle imbalance:
 - Used `stratified train/test split`
 - Applied `class_weight='balanced'` in Logistic Regression
 
----
 
 ## Feature Engineering
 
