@@ -8,11 +8,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
+from sklearn.metrics import precision_score, recall_score, f1_score
 from features import clean_text, extract_numeric_features
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 df = pd.read_csv("data/data.csv")
+logging.info("Dataset loaded")
 X = df["message"]
 y = df["label"]
 
@@ -22,10 +25,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 X_train_clean = X_train.apply(clean_text)
 X_test_clean = X_test.apply(clean_text)
 
-tfidf = TfidfVectorizer(max_features=2000, ngram_range=(1,2), stop_words='english', min_df=2)
+tfidf = TfidfVectorizer(max_features=2000, ngram_range=(1,2), min_df=2)
 X_train_tfidf = tfidf.fit_transform(X_train_clean)
 X_test_tfidf = tfidf.transform(X_test_clean)
-
+logging.info("TF-IDF fitted")
 # Снижение размерности
 # svd = TruncatedSVD(n_components=50, random_state=42)
 # X_train_tfidf_reduced = svd.fit_transform(X_train_tfidf)
@@ -46,7 +49,7 @@ X_test_final = hstack([X_test_tfidf, X_test_num_scaled])
 # Train model
 logreg = LogisticRegression(class_weight='balanced', max_iter=1000, random_state=42)
 logreg.fit(X_train_final, y_train)
-
+logging.info("Model training completed")
 # Evaluation
 y_pred = logreg.predict(X_test_final)
 
