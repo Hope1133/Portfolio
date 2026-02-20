@@ -1,14 +1,16 @@
-import re
+import re, os
 import pandas as pd
 
 URL_PATTERN = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+])+'
 PHONE_PATTERN = r"\+?\d[\d\-\s]{7,}\d"
 MONEY_PATTERN = r'\$|€|£|usd|eur'
 
-FRAUD_KEYWORDS = [
-    "win", "prize", "urgent", "verify",
-    "bank", "card", "password", "blocked", "confirm"
-]
+KEYWORDS_PATH = "artifacts/fraud_keywords.json"
+if os.path.exists(KEYWORDS_PATH):
+    with open(KEYWORDS_PATH, "r") as f:
+        FRAUD_KEYWORDS = set(json.load(f))
+else:
+    FRAUD_KEYWORDS = set()
 
 
 def clean_text(text: str) -> str:
@@ -32,7 +34,6 @@ def extract_numeric_features(X: pd.DataFrame) -> pd.DataFrame:
     features["text_len"] = text.str.len()
     features["num_words"] = text.str.split().str.len()
     features["digit_count"] = text.str.count(r"\d")
-
     features["caps_ratio"] = text.apply(lambda x: sum(c.isupper() for c in x) / len(x) if len(x) > 0 else 0)
 
     features["special_count"] = text.str.count(r"[^\w\s]")
@@ -40,8 +41,8 @@ def extract_numeric_features(X: pd.DataFrame) -> pd.DataFrame:
     features["url_count"] = text.str.count(URL_PATTERN)
     features["phone_count"] = text.str.count(PHONE_PATTERN)
 
-    features["spam_words_count"] = text.apply(
-        lambda x: sum(word in FRAUD_KEYWORDS for word in x.split())
-    )
+    features["spam_words_count"] = text.apply(lambda x: sum(word in FRAUD_KEYWORDS for word in x.split())
+)
+
 
     return features

@@ -1,3 +1,122 @@
+import os
+import joblib
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+from scipy.sparse import hstack
+
+from features import clean_text, extract_numeric_features
+
+
+# ======================
+# 1. Load data
+# ======================
+
+df = pd.read_csv("data/sms.csv")
+
+X = df["message"]
+y = df["label"]
+
+
+# ======================
+# 2. Train / Test split
+# ======================
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+
+# ======================
+# 3. Text preprocessing
+# ======================
+
+X_train_clean = X_train.apply(clean_text)
+X_test_clean = X_test.apply(clean_text)
+
+
+# ======================
+# 4. TF-IDF
+# ======================
+
+tfidf = TfidfVectorizer(
+    max_features=10000,
+    ngram_range=(1, 2)
+)
+
+X_train_tfidf = tfidf.fit_transform(X_train_clean)
+X_test_tfidf = tfidf.transform(X_test_clean)
+
+
+# ======================
+# 5. Numeric features
+# ======================
+
+X_train_num = extract_numeric_features(
+    pd.DataFrame({"message": X_train})
+)
+
+X_test_num = extract_numeric_features(
+    pd.DataFrame({"message": X_test})
+)
+
+# переводим numeric в sparse
+X_train_num = X_train_num.values
+X_test_num = X_test_num.values
+
+
+# ======================
+# 6. Combine features
+# ======================
+
+X_train_final = hstack([X_train_tfidf, X_train_num])
+X_test_final = hstack([X_test_tfidf, X_test_num])
+
+
+# ======================
+# 7. Train model
+# ======================
+
+model = LogisticRegression(
+    max_iter=1000,
+    class_weight="balanced"
+)
+
+model.fit(X_train_final, y_train)
+
+
+# ======================
+# 8. Evaluation
+# ======================
+
+y_pred = model.predict(X_test_final)
+
+print(classification_report(y_test, y_pred))
+
+
+# ======================
+# 9. Save artifacts
+# ======================
+
+os.makedirs("models", exist_ok=True)
+
+joblib.dump(model, "models/logreg_model.pkl")
+joblib.dump(tfidf, "models/tfidf.pkl")
+
+print("Training complete. Models saved.")
+
+
+
+
+
+
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split

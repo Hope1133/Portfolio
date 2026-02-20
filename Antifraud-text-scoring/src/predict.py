@@ -20,3 +20,11 @@ def main(input_path, output_path):
 
 if __name__ == "__main__":
     main("new_sms.csv", "scored_sms.csv")
+
+
+
+
+---
+
+tfidf = joblib.load("models/tfidf.pkl")
+model = joblib.load("models/logreg_model.pkl")
