@@ -1,5 +1,6 @@
 import re, os
 import pandas as pd
+import json
 
 URL_PATTERN = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+])+'
 PHONE_PATTERN = r"\+?\d[\d\-\s]{7,}\d"
@@ -16,7 +17,7 @@ else:
 def clean_text(text: str) -> str:
     if not isinstance(text, str):
         return ""
-
+    
     text = text.lower()
     text = re.sub(URL_PATTERN, " URL ", text)
     text = re.sub(PHONE_PATTERN, " PHONE ", text)
@@ -41,8 +42,7 @@ def extract_numeric_features(X: pd.DataFrame) -> pd.DataFrame:
     features["url_count"] = text.str.count(URL_PATTERN)
     features["phone_count"] = text.str.count(PHONE_PATTERN)
 
-    features["spam_words_count"] = text.apply(lambda x: sum(word in FRAUD_KEYWORDS for word in x.split())
-)
+    features["spam_words_count"] = text.apply(lambda x: sum(word in FRAUD_KEYWORDS for word in x.split() ))
 
 
     return features
