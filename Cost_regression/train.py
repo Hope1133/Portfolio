@@ -72,7 +72,7 @@ def main():
     xgb_model = _XGB(X_prep, y_log)
     save_model(xgb_model, X_prep.columns.tolist(), "xgb_model")
 
-    print("ing completed.")
+    print("training completed.")
 
 
 if __name__ == "__main__":
