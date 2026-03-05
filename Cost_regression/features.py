@@ -3,12 +3,17 @@ import numpy as np
 import joblib
 import json
 import ast
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent
+ARTIFACTS_DIR = BASE_DIR / "artifacts"
+MODEL_DIR = BASE_DIR / "models"
 
 def EDA (df):
     # df = df.drop_duplicates()
     df = df.replace('[]', np.nan)
     df['published_at'] = pd.to_datetime(df['published_at']).dt.to_period("Y")
-    with open("artifacts/list_to_drop.json", "r") as f:
+    with open(ARTIFACTS_DIR / "list_to_drop.json", "r") as f:
         lst_to_drop = json.load(f)
     df.drop(columns=[c for c in lst_to_drop if c in df.columns], inplace=True)
     return df
@@ -32,14 +37,14 @@ def location(df):
     
     df['area'] = df['area'].apply(extract_city)
     city_counts = df['area'].value_counts()
-    with open("artifacts/city_area_dict.json", "r") as f:
+    with open(ARTIFACTS_DIR / "city_area_dict.json", "r") as f:
         city_dict = json.load(f)
     df['city'] = df['area'].apply(lambda x: city_dict[x] if x in city_dict else categorize_city(x, city_counts))
     df.drop(['area', 'region'], axis=1, inplace=True, errors="ignore")
 
     df.drop('address', axis=1, inplace=True, errors="ignore")
 
-    with open("artifacts/city_mean_salary.json", "r") as f:
+    with open(ARTIFACTS_DIR/ "city_mean_salary.json", "r") as f:
         city_mean_salary_dict = json.load(f)
     df['city_mean_salary'] = df['city'].map(city_mean_salary_dict)
     df.drop('city', axis=1, inplace=True, errors="ignore")
@@ -53,12 +58,12 @@ def json_cols(df):
     df['schedule'] = df['schedule'].apply(lambda x: json.loads(x.replace("'", '"')).get('name') if pd.notna(x) else None)
     
     df['experience'] = df['experience'].apply(lambda x: json.loads(x.replace("'", '"')).get('name') if pd.notna(x) else None)
-    df['experience'].replace({"Нет опыта" : 0, "От 1 года до 3 лет" : 1, "От 3 до 6 лет" : 2, "Более 6 лет" : 3}, inplace=True)
+    df['experience'] = df['experience'].replace({"Нет опыта" : 0, "От 1 года до 3 лет" : 1, "От 3 до 6 лет" : 2, "Более 6 лет" : 3})
 
     return df
 
 def name_with_emb(df):
-    model = joblib.load("models/emb_model.pkl")
+    model = joblib.load(MODEL_DIR / "emb_model.pkl")
     embeddings_name = model.encode(df['name'].str.lower().replace(r'[\W_]+', ' ', regex=True).tolist()) # Приводим к нижнему регистру, заменяем небуквенно-цифровые символы на пробелы, преобразуем в список строк
     emb_df = pd.DataFrame(embeddings_name, columns=[f'name_emb_{i}' for i in range(embeddings_name.shape[1])])
     df = pd.concat([df, emb_df], axis=1)
@@ -100,6 +105,7 @@ def schedule_one_hot(df):
     return df
 
 def prepare_features(X):
+    ARTIFACTS_DIR.mkdir(exist_ok=True)
     X = EDA(X)
     X = location(X)
     X = json_cols(X)

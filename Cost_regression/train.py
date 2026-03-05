@@ -5,12 +5,15 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
+from pathlib import Path
 
 from features import prepare_features
 from dicts import calc_city_mean_salary, columns_to_drop, city_area_dict
 
 RANDOM_STATE = 42
-MODEL_DIR = "../models"
+BASE_DIR = Path(__file__).parent
+DATA_DIR = BASE_DIR / "data"
+MODEL_DIR = BASE_DIR / "models"
 
 def load_data(path: str):
     df = pd.read_csv(path)
@@ -19,14 +22,14 @@ def load_data(path: str):
     return X, y
 
 def embeddings_model():
+    MODEL_DIR.mkdir(exist_ok=True)  # создаём папку, если её нет
     model = SentenceTransformer("all-MiniLM-L6-v2")
-    joblib.dump(model, "models/emb_model.pkl")
+    joblib.dump(model, MODEL_DIR / "emb_model.pkl")
 
 def _linear(X, y_log):
     model = LinearRegression()
     model.fit(X, y_log)
     return model
-
 
 def _XGB(X, y_log):
     model = XGBRegressor(
@@ -44,21 +47,24 @@ def _XGB(X, y_log):
     return model
 
 def save_model(model, feature_columns, model_name: str):
-    os.makedirs(MODEL_DIR, exist_ok=True)
-
-    joblib.dump(model, os.path.join(MODEL_DIR, f"{model_name}.pkl"))
-    joblib.dump(feature_columns, os.path.join(MODEL_DIR, f"{model_name}_columns.pkl"))
+    MODEL_DIR.mkdir(exist_ok=True)
+    joblib.dump(model, MODEL_DIR / f"{model_name}.pkl")
+    joblib.dump(feature_columns, MODEL_DIR / f"{model_name}_columns.pkl")
 
 
 def main():
     embeddings_model()
 
-    X, y = load_data("../data/train.csv")
+    X, y = load_data(DATA_DIR / "train.csv")
 
     columns_to_drop(X)
     calc_city_mean_salary(pd.concat([X, y], axis=1))
     city_area_dict(X)
     X_prep = prepare_features(X)
+
+    # pd.set_option('display.max_columns', None)
+    # print(X_prep.iloc[:,:20])
+    # return
 
     y_log = np.log1p(y)
     lin_model = _linear(X_prep, y_log)
