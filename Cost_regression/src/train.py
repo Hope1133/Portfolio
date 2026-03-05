@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
 
-from features import prepare_features, pred_cols_coincedence
+from features import prepare_features
 from dicts import calc_city_mean_salary, columns_to_drop, city_area_dict
 
 RANDOM_STATE = 42

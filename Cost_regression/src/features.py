@@ -10,7 +10,7 @@ def EDA (df):
     df['published_at'] = pd.to_datetime(df['published_at']).dt.to_period("Y")
     with open("artifacts/list_to_drop.json", "r") as f:
         lst_to_drop = json.load(f)
-    df.drop(lst_to_drop, axis=1, inplace=True)
+    df.drop(columns=[c for c in lst_to_drop if c in df.columns], inplace=True)
     return df
 
 
@@ -34,25 +34,25 @@ def location(df):
     city_counts = df['area'].value_counts()
     with open("artifacts/city_area_dict.json", "r") as f:
         city_dict = json.load(f)
-    df['city'] = df['area'].apply(lambda x: city_dict.get(x) or categorize_city(x, city_counts))
-    df.drop(['area', 'region'], axis=1, inplace=True)
+    df['city'] = df['area'].apply(lambda x: city_dict[x] if x in city_dict else categorize_city(x, city_counts))
+    df.drop(['area', 'region'], axis=1, inplace=True, errors="ignore")
 
-    df.drop('address', axis=1, inplace=True)
+    df.drop('address', axis=1, inplace=True, errors="ignore")
 
     with open("artifacts/city_mean_salary.json", "r") as f:
         city_mean_salary_dict = json.load(f)
     df['city_mean_salary'] = df['city'].map(city_mean_salary_dict)
-    df.drop('city', axis=1, inplace=True)
+    df.drop('city', axis=1, inplace=True, errors="ignore")
     return df
 
 def json_cols(df):
-    df['type'] = df['type'].apply(lambda x: json.loads(x.replace("'", '"')).get('name'))
+    df['type'] = df['type'].apply(lambda x: json.loads(x.replace("'", '"')).get('name') if pd.notna(x) else None)
     df['is_open'] = df['type'].replace({"Открытая" : 1, "Анонимная" : 0, "Рекламная" : 1}).astype(int)
     df.drop('type', axis = 1, inplace = True)
 
-    df['schedule'] = df['schedule'].apply(lambda x: json.loads(x.replace("'", '"')).get('name'))
+    df['schedule'] = df['schedule'].apply(lambda x: json.loads(x.replace("'", '"')).get('name') if pd.notna(x) else None)
     
-    df['experience'] = df['experience'].apply(lambda x: json.loads(x.replace("'", '"')).get('name'))
+    df['experience'] = df['experience'].apply(lambda x: json.loads(x.replace("'", '"')).get('name') if pd.notna(x) else None)
     df['experience'].replace({"Нет опыта" : 0, "От 1 года до 3 лет" : 1, "От 3 до 6 лет" : 2, "Более 6 лет" : 3}, inplace=True)
 
     return df
