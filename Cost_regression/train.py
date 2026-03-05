@@ -53,7 +53,7 @@ def save_model(model, feature_columns, model_name: str):
 def main():
     embeddings_model()
 
-    X, y = load_data("../data/train_contest.csv")
+    X, y = load_data("../data/train.csv")
 
     columns_to_drop(X)
     calc_city_mean_salary(pd.concat([X, y], axis=1))

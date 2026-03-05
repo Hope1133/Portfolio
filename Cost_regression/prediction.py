@@ -26,7 +26,7 @@ def pred_cols_coincedence(X_train, X_pred):
     train_cols_order = X_train.columns.tolist()
     return X_pred[train_cols_order]
 
-df = pd.read_csv("data/train_contest.csv")
+df = pd.read_csv("data/train.csv")
 df_pred = pd.read_csv("data/for_prediction.csv")
 
 X = df.drop('mean_salary', axis=1)
